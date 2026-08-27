@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export type Route = "app" | "how" | "proof";
+export type Route = "app" | "how" | "proof" | "plan";
 
 /**
  * Hash routing, deliberately not a router library.
@@ -12,7 +12,7 @@ export type Route = "app" | "how" | "proof";
  */
 function read(): Route {
   const slug = window.location.hash.replace(/^#\/?/, "");
-  return slug === "how" || slug === "proof" ? slug : "app";
+  return slug === "how" || slug === "proof" || slug === "plan" ? slug : "app";
 }
 
 export function useRoute(): [Route, (r: Route) => void] {
