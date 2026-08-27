@@ -58,3 +58,7 @@ test-ledger/
 Thumbs.db
 *.log
 .claude/settings.local.json
+
+# The teaser holds a commercial music track — keep it out of the public repo.
+/teaser/
+/bullbank/public/teaser/
