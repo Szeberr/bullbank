@@ -1,0 +1,106 @@
+# BullBank buyback crank — scheduled run.
+#
+# Copy this to .github/workflows/crank.yml in the repo that holds crank/.
+#
+# WHAT IT DOES
+#   Every 6 hours: claim pump.fun creator fees, buy BULL with the SOL, deposit
+#   it into the reserve. Every run is logged publicly, which doubles as proof to
+#   holders that the buyback is real and continuous.
+#
+# ────────────────────────────────────────────────────────────────────────────
+# SECURITY — read before enabling
+#
+# This puts a hot wallet's private key into GitHub Secrets. That is a genuine
+# trade-off, not a free lunch:
+#
+#   * Anyone with admin/write access to the repo can exfiltrate a secret by
+#     opening a pull request that prints it. Restrict who can push, and require
+#     review on workflow changes.
+#   * Never run this workflow on `pull_request` triggers from forks.
+#   * The wallet should hold only what is needed to operate. Sweep the fee
+#     income regularly rather than letting a balance build up.
+#   * MAX_SPEND_SOL caps a single run, so a compromised schedule cannot drain
+#     the wallet in one go — but it can drain it over many runs. The cap is a
+#     speed bump, not a lock.
+#
+# If the token does well enough that the wallet holds serious money, move this
+# off GitHub Actions onto a machine you control with the key in a proper secret
+# store.
+# ────────────────────────────────────────────────────────────────────────────
+
+name: buyback crank
+
+on:
+  schedule:
+    # Every 6 hours. Frequent enough that fees do not sit idle, infrequent
+    # enough that each buy is large enough to be worth its transaction fees.
+    - cron: "0 */6 * * *"
+  # Manual trigger, so a run can be forced and — importantly — dry-run first.
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: "Actually spend funds (false = dry run)"
+        type: boolean
+        default: false
+
+# Never let two runs overlap. Two cranks buying at once would compete on the
+# same balance and double the market impact.
+concurrency:
+  group: buyback-crank
+  cancel-in-progress: false
+
+jobs:
+  crank:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install
+        working-directory: crank
+        run: npm ci || npm install
+
+      - name: Write keypair
+        working-directory: crank
+        env:
+          CRANK_KEYPAIR_JSON: ${{ secrets.CRANK_KEYPAIR_JSON }}
+        run: |
+          if [ -z "$CRANK_KEYPAIR_JSON" ]; then
+            echo "CRANK_KEYPAIR_JSON secret is not set." >&2
+            exit 1
+          fi
+          printf '%s' "$CRANK_KEYPAIR_JSON" > ./crank-key.json
+          chmod 600 ./crank-key.json
+
+      - name: Run crank
+        working-directory: crank
+        env:
+          RPC_URL: ${{ secrets.RPC_URL }}
+          TOKEN_MINT: ${{ secrets.TOKEN_MINT }}
+          POOL_PDA: ${{ secrets.POOL_PDA }}
+          REWARD_VAULT: ${{ secrets.REWARD_VAULT }}
+          PROGRAM_ID: ${{ secrets.PROGRAM_ID }}
+          CRANK_KEYPAIR: ./crank-key.json
+          # Guard rails. Raise deliberately, never casually.
+          GAS_RESERVE_SOL: "0.05"
+          MIN_SPEND_SOL: "0.05"
+          MAX_SPEND_SOL: "5"
+          SLIPPAGE_BPS: "150"
+          MAX_PRICE_IMPACT_PCT: "3"
+        run: |
+          # Scheduled runs execute. Manual runs are dry unless explicitly told.
+          if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ inputs.execute }}" = "true" ]; then
+            npx tsx buyback.ts --execute
+          else
+            npx tsx buyback.ts
+          fi
+
+      - name: Shred keypair
+        working-directory: crank
+        if: always()
+        run: shred -u ./crank-key.json 2>/dev/null || rm -f ./crank-key.json

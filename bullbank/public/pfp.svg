@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000" width="1000" height="1000">
+  <!--
+    BullBank avatar — BB monogram.
+
+    Letterforms are drawn as paths, not <text>. A text element would render with
+    whatever font the viewing machine happens to have, so the same file would
+    look different everywhere — unacceptable for an identity asset.
+
+    Everything sits inside a 430px-radius circle around the centre, because X and
+    most platforms crop avatars to a circle. Anything outside that gets cut.
+  -->
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="38%" r="72%">
+      <stop offset="0%" stop-color="#16240c"/>
+      <stop offset="55%" stop-color="#0b0f08"/>
+      <stop offset="100%" stop-color="#06080a"/>
+    </radialGradient>
+
+    <linearGradient id="letters" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#b4ff6e"/>
+      <stop offset="60%" stop-color="#7ce81f"/>
+      <stop offset="100%" stop-color="#5cba14"/>
+    </linearGradient>
+
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%">
+      <feGaussianBlur stdDeviation="13" result="b"/>
+      <feComponentTransfer in="b" result="bd">
+        <feFuncA type="linear" slope="0.5"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode in="bd"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <!-- One B, drawn at 310 x 400 and reused. -->
+    <path id="B" fill-rule="evenodd" d="
+      M0,0 H190 C252,0 296,44 296,100 C296,143 270,176 234,190
+      C276,202 306,240 306,290 C306,352 258,400 192,400 H0 Z
+      M84,58 V152 H186 C214,152 232,131 232,105 C232,79 214,58 186,58 Z
+      M84,228 V342 H190 C226,342 248,318 248,285 C248,252 226,228 190,228 Z
+    "/>
+  </defs>
+
+  <rect width="1000" height="1000" fill="url(#bg)"/>
+
+  <!-- Faint grid, echoing the site background. Kept very low contrast so it
+       reads as texture at full size and disappears at 48px. -->
+  <g stroke="#7ce81f" stroke-opacity="0.05" stroke-width="2">
+    <path d="M250 0V1000M500 0V1000M750 0V1000M0 250H1000M0 500H1000M0 750H1000"/>
+  </g>
+
+  <!-- Containment ring, inset from the crop edge. -->
+  <circle cx="500" cy="500" r="452" fill="none" stroke="#7ce81f" stroke-opacity="0.22" stroke-width="4"/>
+
+  <g filter="url(#glow)">
+    <g fill="url(#letters)">
+      <use href="#B" transform="translate(189 288) scale(0.95 1.06)"/>
+      <use href="#B" transform="translate(520 288) scale(0.95 1.06)"/>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,60 @@
+# ─────────────────────────────────────────────────────────────
+# SECRETS — nothing here may ever be committed.
+# ─────────────────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# Solana keypairs are plain JSON byte arrays. A committed one is an immediate,
+# unrecoverable loss of whatever it controls.
+*keypair*.json
+*-key.json
+crank-key.json
+id.json
+
+# ─────────────────────────────────────────────────────────────
+# Build output and dependencies
+# ─────────────────────────────────────────────────────────────
+node_modules/
+dist/
+target/
+.anchor/
+test-ledger/
+*.tsbuildinfo
+.vite/
+
+# ─────────────────────────────────────────────────────────────
+# Legacy — the earlier DiamondHands project.
+#
+# Excluded deliberately rather than deleted: it still contains a different
+# token's live mainnet addresses, and publishing it alongside BullBank would
+# confuse anyone trying to verify which program is which.
+# ─────────────────────────────────────────────────────────────
+#
+# Every pattern below is anchored with a leading slash so it matches ONLY at the
+# repo root. Unanchored, `lib.rs` would also have excluded
+# program/programs/memecoin-staking/src/lib.rs — the actual program, i.e. the
+# entire point of publishing this — and `index.html` would have excluded the
+# app's entry point, leaving the site unbuildable.
+/index.html
+/index.html.bak
+/gitgub/
+/lib.rs
+/lib_sol.rs
+/lib_tiers.rs
+/staking.ts
+/staking sol1.ts
+/staking_tiers.ts
+/crank.ts
+/crank-mainnet.ts
+/init-pool.ts
+/PROJECT_STATUS_1.md
+/TOKENOMICS.md
+
+# ─────────────────────────────────────────────────────────────
+# Local noise
+# ─────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+*.log
+.claude/settings.local.json

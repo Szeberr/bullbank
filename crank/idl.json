@@ -1,0 +1,542 @@
+{
+  "address": "BLj7FScr8f57ygqFGJJtZ3sVRCx7C7gUQihyUWYptBYq",
+  "metadata": {
+    "name": "staking",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "claim",
+      "docs": [
+        "Claim emitted reward tokens from a position. Allowed anytime — the lock",
+        "applies to principal only, never to rewards."
+      ],
+      "discriminator": [
+        62,
+        198,
+        214,
+        193,
+        213,
+        159,
+        108,
+        210
+      ],
+      "accounts": [
+        {
+          "name": "pool",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool.stake_mint",
+                "account": "Pool"
+              }
+            ]
+          }
+        },
+        {
+          "name": "position",
+          "writable": true
+        },
+        {
+          "name": "reward_mint"
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "position"
+          ]
+        },
+        {
+          "name": "owner_reward_ata",
+          "writable": true
+        },
+        {
+          "name": "reward_vault",
+          "writable": true
+        },
+        {
+          "name": "token_program"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "fund_rewards",
+      "docs": [
+        "Top up the emissions pool. Permissionless: the team funds it at launch from",
+        "the staking allocation, but anyone may add to it and nobody has a path to",
+        "take anything back out.",
+        "",
+        "Funding extends how LONG emissions run, never how FAST. The rate is fixed."
+      ],
+      "discriminator": [
+        114,
+        64,
+        163,
+        112,
+        175,
+        167,
+        19,
+        121
+      ],
+      "accounts": [
+        {
+          "name": "pool",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool.stake_mint",
+                "account": "Pool"
+              }
+            ]
+          }
+        },
+        {
+          "name": "reward_mint"
+        },
+        {
+          "name": "funder",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "funder_reward_ata",
+          "writable": true
+        },
+        {
+          "name": "reward_vault",
+          "writable": true
+        },
+        {
+          "name": "token_program"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "initialize_pool",
+      "docs": [
+        "Create the pool. `reward_rate_per_sec` is the EMISSIONS RATE: how many",
+        "reward-token base units are released per second, split across all stakers",
+        "by weighted stake. It is set once here and can NEVER be changed — there is",
+        "no `set_reward_rate` instruction, deliberately.",
+        "",
+        "Emissions do not actually start until someone calls `fund_rewards`, which",
+        "pushes `reward_end_time` forward by `amount / rate` seconds. The pool can",
+        "therefore never promise more rewards than are physically in the vault."
+      ],
+      "discriminator": [
+        95,
+        180,
+        10,
+        172,
+        84,
+        174,
+        232,
+        40
+      ],
+      "accounts": [
+        {
+          "name": "authority",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "pool",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "stake_mint"
+              }
+            ]
+          }
+        },
+        {
+          "name": "stake_mint"
+        },
+        {
+          "name": "reward_mint"
+        },
+        {
+          "name": "stake_vault",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "reward_vault",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "token_program"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "reward_rate_per_sec",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "stake",
+      "docs": [
+        "Stake into a specific tier. The position account is keyed by (pool, owner, tier),",
+        "so a wallet can hold at most ONE position per tier — staking the same tier twice",
+        "fails at account creation. Up to 4 positions (one per tier) per wallet."
+      ],
+      "discriminator": [
+        206,
+        176,
+        202,
+        18,
+        200,
+        209,
+        179,
+        108
+      ],
+      "accounts": [
+        {
+          "name": "pool",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool.stake_mint",
+                "account": "Pool"
+              }
+            ]
+          }
+        },
+        {
+          "name": "position",
+          "writable": true
+        },
+        {
+          "name": "stake_mint"
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "owner_ata",
+          "writable": true
+        },
+        {
+          "name": "stake_vault",
+          "writable": true
+        },
+        {
+          "name": "token_program"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "tier",
+          "type": "u8"
+        },
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "unstake",
+      "docs": [
+        "Unstake from a position. Only allowed after that position's lock expires."
+      ],
+      "discriminator": [
+        90,
+        95,
+        107,
+        42,
+        205,
+        124,
+        50,
+        225
+      ],
+      "accounts": [
+        {
+          "name": "pool",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool.stake_mint",
+                "account": "Pool"
+              }
+            ]
+          }
+        },
+        {
+          "name": "position",
+          "writable": true
+        },
+        {
+          "name": "stake_mint"
+        },
+        {
+          "name": "owner",
+          "signer": true,
+          "relations": [
+            "position"
+          ]
+        },
+        {
+          "name": "owner_ata",
+          "writable": true
+        },
+        {
+          "name": "stake_vault",
+          "writable": true
+        },
+        {
+          "name": "token_program"
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Pool",
+      "discriminator": [
+        241,
+        154,
+        109,
+        4,
+        17,
+        177,
+        109,
+        188
+      ]
+    },
+    {
+      "name": "Position",
+      "discriminator": [
+        170,
+        188,
+        143,
+        228,
+        122,
+        64,
+        247,
+        208
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "ZeroAmount",
+      "msg": "Amount must be greater than zero"
+    },
+    {
+      "code": 6001,
+      "name": "BadTier",
+      "msg": "Invalid tier (must be 0-3)"
+    },
+    {
+      "code": 6002,
+      "name": "InsufficientStake",
+      "msg": "Insufficient staked balance"
+    },
+    {
+      "code": 6003,
+      "name": "StillLocked",
+      "msg": "Position is still locked"
+    },
+    {
+      "code": 6004,
+      "name": "NothingToClaim",
+      "msg": "Nothing to claim"
+    },
+    {
+      "code": 6005,
+      "name": "FundTooSmall",
+      "msg": "Funding amount too small to buy a second of emissions"
+    },
+    {
+      "code": 6006,
+      "name": "VaultsMustDiffer",
+      "msg": "Stake vault and reward vault must be different accounts"
+    },
+    {
+      "code": 6007,
+      "name": "Overflow",
+      "msg": "Arithmetic overflow"
+    }
+  ],
+  "types": [
+    {
+      "name": "Pool",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "stake_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "reward_mint",
+            "type": "pubkey"
+          },
+          {
+            "name": "stake_vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "reward_vault",
+            "type": "pubkey"
+          },
+          {
+            "name": "total_weighted",
+            "type": "u64"
+          },
+          {
+            "name": "acc_reward_per_share",
+            "type": "u128"
+          },
+          {
+            "name": "reward_rate_per_sec",
+            "type": "u64"
+          },
+          {
+            "name": "last_update_time",
+            "type": "i64"
+          },
+          {
+            "name": "reward_end_time",
+            "type": "i64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Position",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "pool",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "weighted",
+            "type": "u64"
+          },
+          {
+            "name": "reward_debt",
+            "type": "u128"
+          },
+          {
+            "name": "accrued",
+            "type": "u64"
+          },
+          {
+            "name": "tier",
+            "type": "u8"
+          },
+          {
+            "name": "unlock_time",
+            "type": "i64"
+          }
+        ]
+      }
+    }
+  ]
+}

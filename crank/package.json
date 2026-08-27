@@ -1,0 +1,21 @@
+{
+  "name": "bullbank-crank",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "crank": "tsx buyback.ts",
+    "crank:execute": "tsx buyback.ts --execute"
+  },
+  "dependencies": {
+    "@coral-xyz/anchor": "^0.31.1",
+    "@solana/spl-token": "^0.4.15",
+    "@solana/web3.js": "^1.98.4",
+    "dotenv": "^17.4.2",
+    "tsx": "^4.23.12"
+  },
+  "devDependencies": {
+    "@types/node": "^26.4.0",
+    "typescript": "^7.0.2"
+  }
+}
