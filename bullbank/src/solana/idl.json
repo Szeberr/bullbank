@@ -224,6 +224,87 @@
       ]
     },
     {
+      "name": "poke",
+      "docs": [
+        "Re-read someone's wallet balance and correct their registered weight.",
+        "Anyone may call this for anyone.",
+        "",
+        "This exists to close a griefing hole. Registered weight only shrinks when",
+        "the holder themselves syncs, so an attacker could borrow a large balance,",
+        "sync it, return the borrowed tokens and simply never sync again. Their own",
+        "payout stays near zero — `min(registered, current)` sees to that — but the",
+        "inflated weight stays in `total_weighted` forever, permanently shrinking",
+        "every honest holder's share. It costs an attacker one transaction and",
+        "harms everyone else indefinitely.",
+        "",
+        "Letting anyone poke a position removes the asymmetry: the weight can be",
+        "dragged back to the truth by any observer. There is no trust issue in",
+        "making it permissionless, because the balance is read from the chain — a",
+        "caller cannot make it say anything other than what is actually held.",
+        "",
+        "Settlement still uses `min(registered, current)`, so poking someone can",
+        "never pay them more than they were owed, and never takes what they have",
+        "already earned."
+      ],
+      "discriminator": [
+        46,
+        24,
+        16,
+        107,
+        212,
+        9,
+        17,
+        5
+      ],
+      "accounts": [
+        {
+          "name": "pool",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  111,
+                  111,
+                  108
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "pool.stake_mint",
+                "account": "Pool"
+              }
+            ]
+          }
+        },
+        {
+          "name": "position",
+          "docs": [
+            "Addressed by the position's own stored owner, not by the caller — this is",
+            "what makes it permissionless without letting anyone touch the wrong account."
+          ],
+          "writable": true
+        },
+        {
+          "name": "owner_ata",
+          "docs": [
+            "The position owner's token account. Same two constraints as sync: right",
+            "mint, and genuinely owned by the position's owner."
+          ]
+        },
+        {
+          "name": "caller",
+          "docs": [
+            "Anyone. Pays the transaction fee and gets nothing for it."
+          ],
+          "signer": true
+        }
+      ],
+      "args": []
+    },
+    {
       "name": "stake",
       "docs": [
         "Lock tokens into the vault at a boost tier (1..=3).",
@@ -531,16 +612,21 @@
     },
     {
       "code": 6009,
+      "name": "MintsMustMatch",
+      "msg": "Stake mint and reward mint must be the same token"
+    },
+    {
+      "code": 6010,
       "name": "WrongMint",
       "msg": "Token account belongs to a different mint"
     },
     {
-      "code": 6010,
+      "code": 6011,
       "name": "WrongOwner",
       "msg": "Token account is not owned by the signer"
     },
     {
-      "code": 6011,
+      "code": 6012,
       "name": "Overflow",
       "msg": "Arithmetic overflow"
     }

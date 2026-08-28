@@ -38,6 +38,15 @@ pub mod staking {
             ctx.accounts.reward_vault.key(),
             StakeError::VaultsMustDiffer
         );
+        // The design assumes one token throughout: `claim` sends reward_mint to a
+        // token account constrained to stake_mint, so a pool created with two
+        // different mints would accept deposits and then fail every single claim.
+        // Initialisation is irreversible, so this has to be caught here.
+        require_keys_eq!(
+            ctx.accounts.stake_mint.key(),
+            ctx.accounts.reward_mint.key(),
+            StakeError::MintsMustMatch
+        );
 
         let now = Clock::get()?.unix_timestamp;
         let pool = &mut ctx.accounts.pool;
@@ -139,6 +148,50 @@ pub mod staking {
         Ok(())
     }
 
+    /// Re-read someone's wallet balance and correct their registered weight.
+    /// Anyone may call this for anyone.
+    ///
+    /// This exists to close a griefing hole. Registered weight only shrinks when
+    /// the holder themselves syncs, so an attacker could borrow a large balance,
+    /// sync it, return the borrowed tokens and simply never sync again. Their own
+    /// payout stays near zero — `min(registered, current)` sees to that — but the
+    /// inflated weight stays in `total_weighted` forever, permanently shrinking
+    /// every honest holder's share. It costs an attacker one transaction and
+    /// harms everyone else indefinitely.
+    ///
+    /// Letting anyone poke a position removes the asymmetry: the weight can be
+    /// dragged back to the truth by any observer. There is no trust issue in
+    /// making it permissionless, because the balance is read from the chain — a
+    /// caller cannot make it say anything other than what is actually held.
+    ///
+    /// Settlement still uses `min(registered, current)`, so poking someone can
+    /// never pay them more than they were owed, and never takes what they have
+    /// already earned.
+    pub fn poke(ctx: Context<Poke>) -> Result<()> {
+        update_pool(&mut ctx.accounts.pool)?;
+
+        let current_balance = ctx.accounts.owner_ata.amount;
+        let current_weight = weight_for(current_balance, HOLD_TIER)?;
+        let pool_acc = ctx.accounts.pool.acc_reward_per_share;
+
+        let pos = &mut ctx.accounts.position;
+        let effective = pos.weight.min(current_weight);
+        settle(pos, pool_acc, effective)?;
+
+        let old_weight = pos.weight;
+        pos.weight = current_weight;
+        pos.balance = current_balance;
+
+        let pool = &mut ctx.accounts.pool;
+        pool.total_weighted = pool
+            .total_weighted
+            .checked_sub(old_weight)
+            .ok_or(StakeError::Overflow)?
+            .checked_add(current_weight)
+            .ok_or(StakeError::Overflow)?;
+        Ok(())
+    }
+
     /// Lock tokens into the vault at a boost tier (1..=3).
     ///
     /// Unlike `sync`, this genuinely takes custody: the tokens leave the holder's
@@ -217,8 +270,19 @@ pub mod staking {
             let w = pos.weight;
             settle(pos, acc, w)?;
 
-            removed_weight = weight_for(amount, pos.tier)?;
             pos.balance = pos.balance.checked_sub(amount).ok_or(StakeError::Overflow)?;
+
+            // Weight is floor(amount * multiplier), so withdrawing in several
+            // parts removes slightly less weight than depositing in one added:
+            // floor(a*m) + floor(b*m) <= floor((a+b)*m). Left alone, a fully
+            // emptied position would keep a few base units of weight and carry
+            // on earning forever on nothing. When the balance reaches zero the
+            // remaining weight goes with it.
+            removed_weight = if pos.balance == 0 {
+                pos.weight
+            } else {
+                weight_for(amount, pos.tier)?
+            };
             pos.weight = pos.weight.checked_sub(removed_weight).ok_or(StakeError::Overflow)?;
         }
 
@@ -469,6 +533,29 @@ pub struct Sync<'info> {
 }
 
 #[derive(Accounts)]
+pub struct Poke<'info> {
+    #[account(mut, seeds = [b"pool", pool.stake_mint.as_ref()], bump = pool.bump)]
+    pub pool: Account<'info, Pool>,
+    /// Addressed by the position's own stored owner, not by the caller — this is
+    /// what makes it permissionless without letting anyone touch the wrong account.
+    #[account(
+        mut,
+        seeds = [b"position", pool.key().as_ref(), position.owner.as_ref(), &[HOLD_TIER]],
+        bump,
+    )]
+    pub position: Account<'info, Position>,
+    /// The position owner's token account. Same two constraints as sync: right
+    /// mint, and genuinely owned by the position's owner.
+    #[account(
+        constraint = owner_ata.mint == pool.stake_mint @ StakeError::WrongMint,
+        constraint = owner_ata.owner == position.owner @ StakeError::WrongOwner,
+    )]
+    pub owner_ata: InterfaceAccount<'info, TokenAccount>,
+    /// Anyone. Pays the transaction fee and gets nothing for it.
+    pub caller: Signer<'info>,
+}
+
+#[derive(Accounts)]
 #[instruction(tier: u8)]
 pub struct Stake<'info> {
     #[account(mut, seeds = [b"pool", pool.stake_mint.as_ref()], bump = pool.bump)]
@@ -562,6 +649,8 @@ pub enum StakeError {
     FundTooSmall,
     #[msg("Stake vault and reward vault must be different accounts")]
     VaultsMustDiffer,
+    #[msg("Stake mint and reward mint must be the same token")]
+    MintsMustMatch,
     #[msg("Token account belongs to a different mint")]
     WrongMint,
     #[msg("Token account is not owned by the signer")]
