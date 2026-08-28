@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <!--
+    Social share card, 1200x630 — the size X, Telegram, Discord and Facebook all
+    crop from. Everything sits well inside the edges because some clients trim.
+
+    Text is fine here even though it is not fine in the logo: this file is
+    rasterised to PNG once, at build time, so the font only has to exist on the
+    machine doing the rasterising. Viewers only ever see the PNG.
+  -->
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="28%" r="75%">
+      <stop offset="0%" stop-color="#17260d"/>
+      <stop offset="58%" stop-color="#0a0e07"/>
+      <stop offset="100%" stop-color="#06080a"/>
+    </radialGradient>
+
+    <linearGradient id="green" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#b4ff6e"/>
+      <stop offset="65%" stop-color="#7ce81f"/>
+      <stop offset="100%" stop-color="#5cba14"/>
+    </linearGradient>
+
+    <filter id="soft" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="9" result="b"/>
+      <feComponentTransfer in="b" result="bd">
+        <feFuncA type="linear" slope="0.5"/>
+      </feComponentTransfer>
+      <feMerge>
+        <feMergeNode in="bd"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+
+    <path id="B" fill-rule="evenodd" d="
+      M0,0 H190 C252,0 296,44 296,100 C296,143 270,176 234,190
+      C276,202 306,240 306,290 C306,352 258,400 192,400 H0 Z
+      M84,58 V152 H186 C214,152 232,131 232,105 C232,79 214,58 186,58 Z
+      M84,228 V342 H190 C226,342 248,318 248,285 C248,252 226,228 190,228 Z
+    "/>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <g stroke="#7ce81f" stroke-opacity="0.05" stroke-width="2">
+    <path d="M150 0V630M300 0V630M450 0V630M600 0V630M750 0V630M900 0V630M1050 0V630
+             M0 105H1200M0 210H1200M0 315H1200M0 420H1200M0 525H1200"/>
+  </g>
+
+  <!-- BB mark -->
+  <g filter="url(#soft)" fill="url(#green)">
+    <use href="#B" transform="translate(524 118) scale(0.30 0.30)"/>
+    <use href="#B" transform="translate(620 118) scale(0.30 0.30)"/>
+  </g>
+
+  <!-- Wordmark -->
+  <text x="600" y="330" text-anchor="middle"
+        font-family="Arial Black, Arial, Helvetica, sans-serif"
+        font-size="96" font-weight="900" letter-spacing="2"
+        fill="#f4f5f7">BULLBANK</text>
+
+  <!-- Tagline -->
+  <text x="600" y="396" text-anchor="middle"
+        font-family="Arial, Helvetica, sans-serif"
+        font-size="30" font-weight="500"
+        fill="#9aa1ac">A token that pays you every second</text>
+
+  <!-- Three proof points, evenly spaced -->
+  <g font-family="Arial, Helvetica, sans-serif" text-anchor="middle">
+    <text x="300" y="506" font-size="25" font-weight="700" fill="#7ce81f">Hold it</text>
+    <text x="300" y="540" font-size="19" fill="#626873">Nothing gets locked</text>
+
+    <text x="600" y="506" font-size="25" font-weight="700" fill="#7ce81f">Earn every second</text>
+    <text x="600" y="540" font-size="19" fill="#626873">From a fixed reserve</text>
+
+    <text x="900" y="506" font-size="25" font-weight="700" fill="#7ce81f">Claim anytime</text>
+    <text x="900" y="540" font-size="19" fill="#626873">No deadline</text>
+  </g>
+
+  <!-- Hairline separators between the three columns -->
+  <g stroke="#7ce81f" stroke-opacity="0.16" stroke-width="2">
+    <path d="M450 486V548M750 486V548"/>
+  </g>
+</svg>

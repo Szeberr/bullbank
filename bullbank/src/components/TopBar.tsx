@@ -52,8 +52,8 @@ export function TopBar({
   refreshing: boolean;
   lastUpdated: number | null;
   onRefresh: () => void;
-  route: "app" | "how" | "proof";
-  onNavigate: (r: "app" | "how" | "proof") => void;
+  route: "app" | "how" | "proof" | "plan";
+  onNavigate: (r: "app" | "how" | "proof" | "plan") => void;
 }) {
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-ground/85 backdrop-blur-xl">
@@ -67,7 +67,7 @@ export function TopBar({
           <button
             onClick={() => onNavigate("app")}
             className={cn(
-              "rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
+              "flex h-9 items-center rounded-lg px-2.5 text-xs font-medium transition-colors sm:px-3",
               route === "app" ? "bg-surface-2 text-ink" : "text-ink-faint hover:text-ink-muted"
             )}
           >
@@ -76,20 +76,31 @@ export function TopBar({
           <button
             onClick={() => onNavigate("how")}
             className={cn(
-              "rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
+              "flex h-9 items-center rounded-lg px-2.5 text-xs font-medium transition-colors sm:px-3",
               route === "how" ? "bg-surface-2 text-ink" : "text-ink-faint hover:text-ink-muted"
             )}
           >
-            How it works
+            <span className="sm:hidden">How</span>
+            <span className="hidden sm:inline">How it works</span>
           </button>
           <button
             onClick={() => onNavigate("proof")}
             className={cn(
-              "rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
+              "flex h-9 items-center rounded-lg px-2.5 text-xs font-medium transition-colors sm:px-3",
               route === "proof" ? "bg-surface-2 text-ink" : "text-ink-faint hover:text-ink-muted"
             )}
           >
-            Transparency
+            <span className="sm:hidden">Proof</span>
+            <span className="hidden sm:inline">Transparency</span>
+          </button>
+          <button
+            onClick={() => onNavigate("plan")}
+            className={cn(
+              "flex h-9 items-center rounded-lg px-2.5 text-xs font-medium transition-colors sm:px-3",
+              route === "plan" ? "bg-surface-2 text-ink" : "text-ink-faint hover:text-ink-muted"
+            )}
+          >
+            Plan
           </button>
         </nav>
 

@@ -23,6 +23,7 @@ import { SiteGrid } from "./components/SiteGrid";
 import { TierCards } from "./components/TierCards";
 import { HowItWorks } from "./components/HowItWorks";
 import { Transparency } from "./components/Transparency";
+import { Roadmap } from "./components/Roadmap";
 import { HoldingPanel } from "./components/HoldingPanel";
 import { LaunchInfo, XIcon } from "./components/LaunchInfo";
 import { Button } from "./components/ui/button";
@@ -368,7 +369,9 @@ export default function App() {
         onNavigate={navigate}
       />
 
-      {route === "proof" ? (
+      {route === "plan" ? (
+        <Roadmap />
+      ) : route === "proof" ? (
         <Transparency
           pool={chain.pool}
           reserveBalance={chain.reserveBalance}
@@ -440,11 +443,11 @@ export default function App() {
 
       <footer className="pointer-events-none relative z-10 mx-auto max-w-[1440px] px-5 pb-10 pt-4 text-center text-[10px] leading-relaxed text-ink-faint">
         <div className="pointer-events-auto mb-4 flex items-center justify-center gap-4">
-          <a href={SOCIALS.x} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-[11px] text-ink-muted transition-colors hover:text-accent">
+          <a href={SOCIALS.x} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-1.5 px-2 text-[12px] text-ink-muted transition-colors hover:text-accent">
             <XIcon /> Our X
           </a>
           <span className="h-3 w-px bg-line" />
-          <a href={SOCIALS.launchpad} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-[11px] text-ink-muted transition-colors hover:text-accent">
+          <a href={SOCIALS.launchpad} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-1.5 px-2 text-[12px] text-ink-muted transition-colors hover:text-accent">
             <Globe size={12} /> Ansem&apos;s Launchpad
           </a>
         </div>

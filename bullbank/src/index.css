@@ -82,10 +82,18 @@
   html {
     background: var(--color-ground);
     color-scheme: dark;
+    /* The background grid is drawn in fixed 56px cells, so on a narrow screen
+       the last column rounds past the viewport edge and drags the whole
+       document wider — the page then scrolled sideways on a phone. `clip` cuts
+       the overhang without turning this into a scroll container, which
+       `overflow-x: hidden` would. */
+    overflow-x: clip;
   }
 
   body {
     margin: 0;
+    overflow-x: clip;
+    max-width: 100vw;
     background:
       radial-gradient(1200px 600px at 50% -200px, rgba(124, 232, 31, 0.06), transparent 70%),
       var(--color-ground);
