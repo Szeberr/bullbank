@@ -346,7 +346,7 @@ export function Transparency({
           <Status
             ok={false}
             label="Independent audit"
-            detail="There has not been one, and none is currently funded. Audits of this kind cost more than the project has. If it earns enough in fees, an audit is the first thing that money goes to — and the full report gets published here, including whatever it finds."
+            detail="There has not been one. Audits of this kind cost more than this project has, so we are not going to claim one is coming. If that ever changes the report gets published here in full, whatever it says."
           />
           <Status
             ok={false}
@@ -510,7 +510,7 @@ export function Transparency({
             <div>
               <div className="text-[13px] font-medium text-ink">Independent audit</div>
               <div className="mt-0.5 text-[11px] leading-relaxed text-ink-faint">
-                None yet, and none funded. Published in full if there is one.
+                None yet. Published in full if there ever is one.
               </div>
             </div>
             {PROOF_LINKS.audit ? (
