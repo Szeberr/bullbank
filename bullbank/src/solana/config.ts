@@ -53,6 +53,7 @@ export const LAUNCHED = env.VITE_LAUNCHED === "true";
 export const SOCIALS = {
   x: "https://x.com/BULLBANKSOLANA",
   launchpad: "https://ansem.io/",
+  github: "https://github.com/Szeberr/bullbank",
 };
 
 /**

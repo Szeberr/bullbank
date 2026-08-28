@@ -26,7 +26,7 @@ import { Transparency } from "./components/Transparency";
 import { Roadmap } from "./components/Roadmap";
 import { Calculator } from "./components/Calculator";
 import { HoldingPanel } from "./components/HoldingPanel";
-import { LaunchInfo, XIcon } from "./components/LaunchInfo";
+import { LaunchInfo, XIcon, GithubIcon } from "./components/LaunchInfo";
 import { Button } from "./components/ui/button";
 import { Card, CardBody } from "./components/ui/card";
 
@@ -466,6 +466,10 @@ export default function App() {
           <span className="h-3 w-px bg-line" />
           <a href={SOCIALS.launchpad} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-1.5 px-2 text-[12px] text-ink-muted transition-colors hover:text-accent">
             <Globe size={12} /> Ansem&apos;s Launchpad
+          </a>
+          <span className="h-3 w-px bg-line" />
+          <a href={SOCIALS.github} target="_blank" rel="noreferrer" className="inline-flex min-h-11 items-center gap-1.5 px-2 text-[12px] text-ink-muted transition-colors hover:text-accent">
+            <GithubIcon size={12} /> GitHub
           </a>
         </div>
         Accrual figures are computed from on-chain state and match what a
