@@ -91,6 +91,32 @@ accrual pauses until the next buyback.
 
 ---
 
+## Building the program
+
+`program/Cargo.lock` is **tracked, and must stay tracked.** It was not, and the
+build broke: unpinned transitive dependencies drifted onto Rust edition2024,
+which the rustc 1.79 inside Solana platform-tools v1.43 cannot parse. The
+program would not compile at all — discovered by running the suite, not by
+anything failing loudly on its own.
+
+Four crates are pinned below their latest release for that reason:
+
+| Crate | Pinned to | Why |
+|---|---|---|
+| `blake3` | 1.5.5 | later versions pull `digest 0.11` -> `block-buffer 0.12` (edition2024) |
+| `zeroize` | 1.8.1 | edition2024 |
+| `unicode-segmentation` | 1.12.0 | requires rustc 1.85 |
+| `indexmap` / `proc-macro-crate` | 2.7.1 / 3.2.0 | `toml_edit 0.25` needs `indexmap >= 2.13` |
+
+The unused `[dev-dependencies]` (litesvm and four solana-* crates) were removed.
+Nothing referenced them and there are no Rust tests — they were dragging in
+`indexmap >= 2.12` and breaking the build of the program itself.
+
+Do not run a bare `cargo update`. It discards these pins and the build stops
+working again. The durable fix is a newer platform-tools, but v1.53 expects a
+different target name than CLI 2.1.0 emits, so that is a deliberate later job —
+not something to attempt between now and launch.
+
 ## Launch day, in order
 
 1. **Deploy the program to mainnet.** Back up
