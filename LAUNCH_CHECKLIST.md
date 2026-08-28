@@ -120,7 +120,7 @@ accrual pauses until the next buyback.
 ## Hosting
 
 Cloudflare Workers (static assets), connected to the GitHub repo so every push
-to `main` redeploys. Live at **https://bullbank.lol9944gg.workers.dev**.
+to `main` redeploys. Live at **https://bullbank.win**.
 
 | Field | Value |
 |---|---|
@@ -132,9 +132,14 @@ to `main` redeploys. Live at **https://bullbank.lol9944gg.workers.dev**.
 is honoured on this flow — verified against the deployed site, which returns
 `X-Frame-Options: DENY` and `frame-ancestors none`.
 
-A `workers.dev` subdomain is fine for a preview and weak for launch: it is a
-shared domain, some link scanners treat it with suspicion, and this one spells
-out the account holder email handle. Buy a real domain before launch.
+`bullbank.win` is the canonical address. Turn the `workers.dev` URL off once
+the domain works — two live addresses for one site makes a lookalike easier to
+pass off, and the `workers.dev` one spells out the account email handle.
+
+`.win` is cheap and carries a poor reputation with some link scanners and mail
+filters, which matters more than usual for a token launch where people are
+already scam-wary. Worth watching: if links get flagged, a `.io` or `.com`
+pointed at the same Worker fixes it without touching the code.
 
 Build configuration lives in `bullbank/.env.production`, tracked in the repo.
 **Every `VITE_*` value is compiled into the JavaScript bundle and is public** —
