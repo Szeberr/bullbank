@@ -162,8 +162,11 @@ Edit `bullbank/.env.production` and push. In order:
 
 1. `VITE_PROGRAM_ID`, `VITE_TOKEN_MINT`, `VITE_POOL_PDA`, `VITE_STAKE_VAULT`,
    `VITE_REWARD_VAULT` — the mainnet values from `pool-addresses.json`.
-2. `VITE_RPC_URL` — a **fresh** Helius mainnet key restricted to bullbank.win.
-   The public mainnet endpoint will not survive real traffic.
+2. `HELIUS_API_KEY` — a **fresh** key, added as a Cloudflare **secret** on the
+   Worker (Settings → Variables and Secrets → Add → type Secret). Not an env
+   var, and never in `.env.production`: the site calls `/rpc` on its own origin
+   and `worker/index.ts` adds the key server-side, so it is never shipped to a
+   browser. Until the secret exists, `/rpc` answers 503 saying exactly that.
 3. `VITE_LAUNCHED=true` — last, and only once the reserve is actually funded.
    This one gates every number on the site.
 

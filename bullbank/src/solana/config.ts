@@ -13,8 +13,26 @@ import { PublicKey } from "@solana/web3.js";
 
 const env = import.meta.env;
 
-export const RPC_URL: string =
-  env.VITE_RPC_URL || "https://api.mainnet-beta.solana.com";
+/**
+ * RPC endpoint.
+ *
+ * A relative value such as `/rpc` is resolved against the site's own origin, so
+ * the browser talks to this domain and the Worker adds the provider key
+ * server-side. That is the only way to use a keyed endpoint here: anything in a
+ * `VITE_` variable is compiled into the bundle and readable by anyone.
+ *
+ * web3.js derives the subscription URL from this one by swapping the scheme, so
+ * `https://…/rpc` becomes `wss://…/rpc` — which the Worker also handles.
+ */
+function resolveRpc(raw: string): string {
+  if (!raw.startsWith("/")) return raw;
+  if (typeof window === "undefined") return raw;
+  return window.location.origin + raw;
+}
+
+export const RPC_URL: string = resolveRpc(
+  env.VITE_RPC_URL || "https://api.mainnet-beta.solana.com"
+);
 
 export const CLUSTER: string = env.VITE_CLUSTER || "mainnet-beta";
 
