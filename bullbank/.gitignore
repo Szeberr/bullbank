@@ -27,3 +27,9 @@ dist-ssr
 .env
 .env.*
 !.env.example
+# .env.production is the deployed build config and is deliberately tracked.
+# Every VITE_ value is compiled into the JavaScript bundle and readable by
+# anyone in devtools, so none of it can be secret in the first place — keeping
+# it in the repo makes the deployed build reproducible instead of depending on
+# dashboard state nobody can see. Never put a key or a token in it.
+!.env.production

@@ -1,0 +1,12 @@
+{
+  // Static-asset Worker. There is no server code: the whole site is a Vite
+  // build, so this declares the output directory and nothing else.
+  "name": "bullbank",
+  "compatibility_date": "2025-01-01",
+  "assets": {
+    "directory": "./dist",
+    // The site uses hash routing, so every real URL is "/". This only matters
+    // for a mistyped path, which gets the app rather than a bare 404.
+    "not_found_handling": "single-page-application"
+  }
+}
