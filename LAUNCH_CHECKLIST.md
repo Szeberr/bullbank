@@ -148,14 +148,24 @@ uses the free public RPC rather than a Helius key, which would be scraped.
 Verified from the live origin: `getHealth` ok and the pool account reads.
 
 
-The site is deliberately on devnet until launch, and the DEVNET badge in the
-header says so. It is a working preview, not a live product, and it should not
-pretend otherwise.
+Pre-launch the cluster is `mainnet-beta` and the five addresses are empty. The
+frontend already skips every chain read when it is not fully configured, so the
+site is an information page: no badge, no banner, and no zeros dressed up as
+balances. Connecting a wallet keeps the pre-launch page rather than opening an
+empty dashboard.
 
-At launch, swap `VITE_RPC_URL` to a **fresh** Helius mainnet key restricted to
-the site domain, `VITE_CLUSTER` to `mainnet-beta`, the four addresses to the
-mainnet ones, and `VITE_LAUNCHED` to `true`. Set `VITE_SITE_URL` to the real
-domain the moment there is one, or the share card breaks.
+That is deliberate. The alternative — staying on devnet with the badge hidden —
+shows test-network state to people with no way of knowing it is not real.
+
+### Turning the app on at launch
+Edit `bullbank/.env.production` and push. In order:
+
+1. `VITE_PROGRAM_ID`, `VITE_TOKEN_MINT`, `VITE_POOL_PDA`, `VITE_STAKE_VAULT`,
+   `VITE_REWARD_VAULT` — the mainnet values from `pool-addresses.json`.
+2. `VITE_RPC_URL` — a **fresh** Helius mainnet key restricted to bullbank.win.
+   The public mainnet endpoint will not survive real traffic.
+3. `VITE_LAUNCHED=true` — last, and only once the reserve is actually funded.
+   This one gates every number on the site.
 
 ### Still outstanding
 - Helius key `faedf721-1bca-40bf-bb14-c9b9e1aeeaef` was exposed and has still
