@@ -1,6 +1,6 @@
 # BullBank buyback crank — scheduled run.
 #
-# Copy this to .github/workflows/crank.yml in the repo that holds crank/.
+# Enabled once the token is live and the crank secrets are set.
 #
 # WHAT IT DOES
 #   Every 6 hours: claim pump.fun creator fees, buy BULL with the SOL, deposit

@@ -24,12 +24,12 @@ custom-panic = []
 anchor-lang = { version = "0.31.0", features = ["init-if-needed"] }
 anchor-spl = "0.31.0"
 
-[dev-dependencies]
-litesvm = "0.10.0"
-solana-message = "3.0.1"
-solana-transaction = "3.0.2"
-solana-signer = "3.0.0"
-solana-keypair = "3.0.1"
+# No dev-dependencies. The test suite is TypeScript (tests/staking_bullbank.ts),
+# run against a validator by `anchor test`; there are no Rust unit tests, and
+# nothing in this crate ever referenced litesvm or the solana-* crates that were
+# listed here. They were pulling `indexmap >= 2.12`, which requires edition2024
+# and cannot be parsed by the rustc 1.79 inside Solana platform-tools v1.43 — so
+# unused test scaffolding was breaking the build of the program itself.
 
 
 [lints.rust]
