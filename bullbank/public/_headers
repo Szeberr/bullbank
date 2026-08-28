@@ -1,0 +1,14 @@
+/*
+  # A wallet site inside an iframe is a phishing primitive: the attacker frames
+  # the real page, overlays their own chrome, and the approval prompt the user
+  # sees comes from a genuine origin. Nothing here needs to be embeddable.
+  X-Frame-Options: DENY
+  Content-Security-Policy: frame-ancestors 'none'
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=(), usb=()
+  Cross-Origin-Opener-Policy: same-origin-allow-popups
+
+# Hashed filenames, so these can never go stale.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
