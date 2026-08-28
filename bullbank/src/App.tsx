@@ -354,13 +354,21 @@ export default function App() {
 
   const missing = missingConfig();
 
+  /*
+    Pre-launch, the pool addresses are deliberately unset: there is no token and
+    no reserve, so there is nothing to read. That is the expected state, not a
+    fault, and the config banner is a developer aid — showing it to visitors
+    would announce a broken site rather than an unlaunched one. It stays for
+    local development, where a missing address really is a mistake.
+  */
+  const configured = missing.length === 0;
+  const showConfigBanner = !configured && import.meta.env.DEV;
+
   return (
     <div className="relative min-h-screen">
       <SiteGrid />
-      {missing.length > 0 && <ConfigBanner missing={missing} />}
-      {chain.error && missing.length === 0 && (
-        <ErrorBanner message={chain.error} />
-      )}
+      {showConfigBanner && <ConfigBanner missing={missing} />}
+      {chain.error && configured && <ErrorBanner message={chain.error} />}
 
       <TopBar
         refreshing={chain.refreshing}
@@ -382,7 +390,13 @@ export default function App() {
         <Calculator pool={chain.pool} />
       ) : route === "how" ? (
         <HowItWorks />
-      ) : !wallet.connected ? (
+      ) : !wallet.connected || !configured ? (
+        /*
+          Connecting a wallet before launch must not open a dashboard. There is
+          no pool to read, so every figure in it would be a zero presented as a
+          balance. The pre-launch page is the honest answer until the addresses
+          are set.
+        */
         <ConnectScreen
           pool={chain.pool}
           reserveBalance={chain.reserveBalance}
