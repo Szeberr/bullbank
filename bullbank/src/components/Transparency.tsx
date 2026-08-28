@@ -346,7 +346,12 @@ export function Transparency({
           <Status
             ok={false}
             label="Independent audit"
-            detail="Not yet complete. This will be updated with the full report, including anything it finds, when it is done."
+            detail="There has not been one. Audits of this kind cost more than this project has, so we are not going to claim one is coming. If that ever changes the report gets published here in full, whatever it says."
+          />
+          <Status
+            ok={false}
+            label="Self-review (not a substitute)"
+            detail="We reviewed our own code and published the result, including three bugs it found and fixed. The reviewer wrote the program, which is precisely the conflict of interest an independent audit removes. Read it, but do not mistake it for one."
           />
           <Status
             ok={false}
@@ -481,11 +486,31 @@ export function Transparency({
               </span>
             )}
           </div>
+          <div className="flex items-center justify-between gap-4 border-b border-line py-3">
+            <div>
+              <div className="text-[13px] font-medium text-ink">Our own security review</div>
+              <div className="mt-0.5 text-[11px] leading-relaxed text-ink-faint">
+                What we found reviewing our own code. Not independent.
+              </div>
+            </div>
+            {PROOF_LINKS.source ? (
+              <a
+                href={PROOF_LINKS.source + "/blob/main/SECURITY_REVIEW.md"}
+                target="_blank"
+                rel="noreferrer"
+                className="shrink-0 rounded-md border border-line px-2.5 py-1.5 text-[11px] text-ink-muted transition-colors hover:border-accent-dim hover:text-accent"
+              >
+                Read it
+              </a>
+            ) : (
+              <span className="shrink-0 text-[11px] text-ink-faint">Not published</span>
+            )}
+          </div>
           <div className="flex items-center justify-between gap-4 py-3">
             <div>
-              <div className="text-[13px] font-medium text-ink">Audit report</div>
+              <div className="text-[13px] font-medium text-ink">Independent audit</div>
               <div className="mt-0.5 text-[11px] leading-relaxed text-ink-faint">
-                Published in full when complete, including anything it finds.
+                None yet. Published in full if there ever is one.
               </div>
             </div>
             {PROOF_LINKS.audit ? (
@@ -499,7 +524,7 @@ export function Transparency({
               </a>
             ) : (
               <span className="shrink-0 text-[11px] text-ink-faint">
-                Not started
+                Not funded
               </span>
             )}
           </div>

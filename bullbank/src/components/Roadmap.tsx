@@ -27,7 +27,6 @@ interface Item {
 }
 
 function buildItems(): Item[] {
-  const audited = Boolean(PROOF_LINKS.audit);
   const published = Boolean(PROOF_LINKS.source);
 
   return [
@@ -50,11 +49,10 @@ function buildItems(): Item[] {
       status: "done",
     },
     {
-      title: "Independent audit",
-      detail: audited
-        ? "Complete. The full report is published, including everything it found."
-        : "A third-party security firm reviews the program before it holds real money. The report gets published in full, including anything it finds.",
-      status: audited ? "done" : "active",
+      title: "Reviewed our own code, published what we found",
+      detail:
+        "Three bugs found and fixed, written up in full. Worth reading — but we wrote the program, so it is not independent review and we do not present it as such.",
+      status: "done",
     },
     {
       title: `Launch ${TOKEN_SYMBOL}`,

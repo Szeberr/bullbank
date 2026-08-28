@@ -24,6 +24,7 @@ import { TierCards } from "./components/TierCards";
 import { HowItWorks } from "./components/HowItWorks";
 import { Transparency } from "./components/Transparency";
 import { Roadmap } from "./components/Roadmap";
+import { Calculator } from "./components/Calculator";
 import { HoldingPanel } from "./components/HoldingPanel";
 import { LaunchInfo, XIcon } from "./components/LaunchInfo";
 import { Button } from "./components/ui/button";
@@ -377,6 +378,8 @@ export default function App() {
           reserveBalance={chain.reserveBalance}
           nowSec={nowSec}
         />
+      ) : route === "calc" ? (
+        <Calculator pool={chain.pool} />
       ) : route === "how" ? (
         <HowItWorks />
       ) : !wallet.connected ? (
