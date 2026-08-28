@@ -271,8 +271,11 @@ describe("bullbank — hold to earn (sync model)", () => {
     const names: string[] = idl.instructions.map((i: any) => i.name).sort();
     assert.deepEqual(
       names,
-      ["claim", "fund_rewards", "initialize_pool", "stake", "sync", "unstake"].sort(),
-      "unexpected instruction — verify it cannot move funds to an admin"
+      // Reviewed individually. `poke` moves no funds at all: it only rewrites a
+      // position weight to the balance read from the chain, and settles at
+      // min(registered, current) so it can never pay more than was owed.
+      ["claim", "fund_rewards", "initialize_pool", "poke", "stake", "sync", "unstake"].sort(),
+      "unexpected instruction — review it before adding it here; it must not be able to move funds to an admin"
     );
   });
 });
@@ -462,4 +465,128 @@ describe("bullbank — many holders share one reserve", () => {
       `distributed ${distributed} exceeds what the rate could have emitted`
     );
   });
+});
+
+describe("bullbank — security review fixes", () => {
+  const provider = anchor.AnchorProvider.env();
+  anchor.setProvider(provider);
+
+  const idl = require("../target/idl/staking.json");
+  const program = new anchor.Program(idl, provider) as Program;
+  const authority = (provider.wallet as anchor.Wallet).payer;
+
+  const griefer = Keypair.generate();
+  const honest = Keypair.generate();
+  const anyone = Keypair.generate();
+  const HELD = 1_000n * ONE;
+  const FUND = RATE * 3600n;
+
+  let env: Awaited<ReturnType<typeof setup>>;
+
+  const positionPda = (owner: PublicKey, tier = HOLD) =>
+    PublicKey.findProgramAddressSync(
+      [Buffer.from("position"), env.poolPda.toBuffer(), owner.toBuffer(), Buffer.from([tier])],
+      program.programId
+    )[0];
+
+  before(async () => {
+    env = await setup(provider, program, authority, [griefer, honest], HELD);
+    const s = await provider.connection.requestAirdrop(anyone.publicKey, 2 * LAMPORTS_PER_SOL);
+    await provider.connection.confirmTransaction(s);
+    await mintTo(provider.connection, authority, env.mint, env.authorityAta, authority, FUND, [], undefined, TP);
+    await (program.methods as any)
+      .fundRewards(new anchor.BN(FUND.toString()))
+      .accounts({
+        pool: env.poolPda, rewardMint: env.mint, funder: authority.publicKey,
+        funderRewardAta: env.authorityAta, rewardVault: env.rewardVault, tokenProgram: TP,
+      }).rpc();
+  });
+
+  it("anyone can correct a stale position, killing the dilution grief", async () => {
+    const grieferAta = env.atas[griefer.publicKey.toBase58()];
+    const honestAta = env.atas[honest.publicKey.toBase58()];
+
+    // Both register their real holdings.
+    for (const kp of [griefer, honest]) {
+      await (program.methods as any).sync()
+        .accounts({
+          pool: env.poolPda, position: positionPda(kp.publicKey), owner: kp.publicKey,
+          ownerAta: env.atas[kp.publicKey.toBase58()], systemProgram: SystemProgram.programId,
+        }).signers([kp]).rpc();
+    }
+
+    // The grief: dump everything and never sync again. Registered weight stays
+    // high, permanently shrinking the honest holder's share.
+    await transfer(
+      provider.connection, griefer, grieferAta, honestAta, griefer,
+      Number(HELD), [], undefined, TP
+    );
+
+    let pool: any = await (program.account as any).pool.fetch(env.poolPda);
+    const inflated = BigInt(pool.totalWeighted.toString());
+    let gpos: any = await (program.account as any).position.fetch(positionPda(griefer.publicKey));
+    assert.equal(
+      gpos.weight.toString(), HELD.toString(),
+      "the stale weight should still be registered — that is the grief"
+    );
+
+    // A bystander pokes it. They gain nothing and pay the fee themselves.
+    await (program.methods as any).poke()
+      .accounts({
+        pool: env.poolPda,
+        position: positionPda(griefer.publicKey),
+        ownerAta: grieferAta,
+        caller: anyone.publicKey,
+      }).signers([anyone]).rpc();
+
+    gpos = await (program.account as any).position.fetch(positionPda(griefer.publicKey));
+    pool = await (program.account as any).pool.fetch(env.poolPda);
+    const corrected = BigInt(pool.totalWeighted.toString());
+
+    console.log(
+      `    total weight ${Number(inflated) / Number(ONE)} -> ${Number(corrected) / Number(ONE)} after poke`
+    );
+    assert.equal(gpos.weight.toString(), "0", "poked position must fall to its real balance");
+    assert.ok(corrected < inflated, "the pool's inflated weight must come down");
+  });
+
+  it("poking cannot steal or inflate — it only writes the on-chain truth", async () => {
+    const honestAta = env.atas[honest.publicKey.toBase58()];
+    const before: any = await (program.account as any).position.fetch(positionPda(honest.publicKey));
+
+    await (program.methods as any).poke()
+      .accounts({
+        pool: env.poolPda,
+        position: positionPda(honest.publicKey),
+        ownerAta: honestAta,
+        caller: anyone.publicKey,
+      }).signers([anyone]).rpc();
+
+    const after: any = await (program.account as any).position.fetch(positionPda(honest.publicKey));
+    const realBalance = (await getAccount(provider.connection, honestAta, undefined, TP)).amount;
+
+    assert.equal(after.weight.toString(), realBalance.toString(), "weight must equal the real balance");
+    assert.ok(
+      BigInt(after.accrued.toString()) >= BigInt(before.accrued.toString()),
+      "poking must never reduce what someone has already earned"
+    );
+    assert.equal(after.owner.toString(), honest.publicKey.toString(), "ownership is untouched");
+  });
+
+  it("rejects a poke that points at the wrong token account", async () => {
+    try {
+      await (program.methods as any).poke()
+        .accounts({
+          pool: env.poolPda,
+          position: positionPda(honest.publicKey),
+          // griefer's account, not honest's
+          ownerAta: env.atas[griefer.publicKey.toBase58()],
+          caller: anyone.publicKey,
+        }).signers([anyone]).rpc();
+      assert.fail("must not accept a token account belonging to someone else");
+    } catch (e: any) {
+      assert.ok(e.toString().includes("WrongOwner"), e.toString());
+    }
+  });
+
 });

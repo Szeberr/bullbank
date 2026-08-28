@@ -43,6 +43,10 @@ const WHAT_IT_DOES: Record<string, { text: string; movesFunds: string }> = {
     text: "Registers your wallet balance so it earns. Reads your token account; moves nothing.",
     movesFunds: "No",
   },
+  poke: {
+    text: "Anyone can refresh anyone else's registered balance to match what they actually hold. Stops someone inflating their weight and never correcting it, which would shrink everyone else's share.",
+    movesFunds: "No",
+  },
   stake: {
     text: "Optional. Locks your tokens for a fixed term in exchange for a higher rate.",
     movesFunds: "Your wallet → the vault",
