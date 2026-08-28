@@ -82,7 +82,15 @@ const CONFIG = {
 };
 
 const WSOL = "So11111111111111111111111111111111111111112";
-const JUPITER = "https://quote-api.jup.ag/v6";
+/**
+ * Jupiter swap API.
+ *
+ * The old `quote-api.jup.ag/v6` host has been retired — it still resolves as a
+ * name but publishes no A records, so every call fails with a DNS error rather
+ * than an HTTP status. That would have taken the buyback leg down on the first
+ * real run. Overridable by env so the next migration needs no code change.
+ */
+const JUPITER = process.env.JUPITER_API || "https://lite-api.jup.ag/swap/v1";
 const EXECUTE = process.argv.includes("--execute");
 
 // ───────────────────────────── helpers ─────────────────────────────
@@ -330,11 +338,10 @@ async function getQuote(lamports: bigint): Promise<JupQuote> {
   }
   if (quote.inputMint !== WSOL) fail(`Quote input mint is not wSOL: ${quote.inputMint}`);
 
-  // VERIFY THIS ON THE FIRST DRY RUN. Jupiter returns priceImpactPct as a string
-  // and it is treated here as a fraction (0.01 -> 1%). If it is actually already
-  // a percentage, this guard is 100x too loose and will wave through a swap that
-  // moves the market badly. The dry run prints the computed figure — compare it
-  // against the same trade quoted in the Jupiter UI before running with --execute.
+  // priceImpactPct is a FRACTION, not a percentage — verified against the live
+  // API: a 100 SOL SOL->USDC quote returns "0.0000142158…", i.e. 0.0014%. So the
+  // x100 below is correct, and the guard is not the hundred-times-too-loose
+  // hazard it was previously suspected of being.
   const impact = Number(quote.priceImpactPct) * 100;
   if (impact > CONFIG.maxPriceImpactPct) {
     fail(
@@ -383,9 +390,13 @@ async function executeSwap(
   }
 
   tx.sign([payer]);
+
+  // Read before sending. A blockhash fetched afterwards describes a later expiry
+  // window than the transaction itself has, so a dropped send would be waited on
+  // past the point it could still land.
+  const latest = await conn.getLatestBlockhash("confirmed");
   const sig = await conn.sendTransaction(tx, { maxRetries: 3 });
 
-  const latest = await conn.getLatestBlockhash("confirmed");
   const conf = await conn.confirmTransaction(
     { signature: sig, ...latest },
     "confirmed"

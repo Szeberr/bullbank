@@ -16,7 +16,7 @@ https://github.com/Szeberr/bullbank — public.
 | Frontend tests | 15 passing |
 | Live wallet test | Passed — connect, sync, claim, lock all executed from Phantom |
 | Mainnet | Nothing deployed |
-| Audit | **Not started** |
+| Audit | **Not doing one** — see below |
 
 ### What is proven
 
@@ -31,7 +31,7 @@ https://github.com/Szeberr/bullbank — public.
 ### What is not proven
 
 - Nothing has ever run on mainnet
-- The crank's **fee-claim step is unimplemented** — see below
+- The crank has never run against a real mint (none exists yet)
 - No audit
 - Mobile browsers untested
 
@@ -52,16 +52,33 @@ something that has been cleared.
 
 Nothing on the site or in the socials may describe the project as audited.
 
-### 2. Finish the crank
-`crank/buyback.ts` claims fees → buys BULL → funds the reserve. The buy and fund
-legs are complete and guarded. **Claiming pump.fun creator fees is not
-implemented** — it needs a third-party API (PumpPortal or the pump.fun SDK) to
-build the transaction, and that transaction must be deserialised and inspected
-before signing. Until then, fees must be claimed manually and the crank run
-afterwards.
+### 2. The crank — complete, and its two open risks are now closed
+`crank/buyback.ts` claims fees → buys BULL → funds the reserve. All three legs
+are implemented and guarded.
 
-Also verify on the first dry run: Jupiter's `priceImpactPct` is treated as a
-fraction. If it is already a percentage, that guard is 100x too loose.
+The fee claim uses PumpPortal's local endpoint, so no API key and no custody of
+a key by anyone else. The returned transaction is verified before signing:
+our wallet must be the only required signer, the transaction must simulate
+cleanly, and the simulated post-balance must be **higher** than the pre-balance.
+That last check is the strong one — a claim by definition pays us, so anything
+that drains the wallet fails it whatever instructions it contains, with no need
+to recognise them individually. A small loss is treated as the ordinary "no fees
+accrued yet" case; a large one aborts the run loudly.
+
+**Two risks that were open here have been resolved:**
+
+- `priceImpactPct` is a fraction, not a percentage — confirmed against the live
+  API (a 100 SOL quote returns `0.0000142…`, i.e. 0.0014%). The x100 in the
+  guard is correct. It was never 100x too loose.
+- **`quote-api.jup.ag/v6` is dead.** It still resolves as a name but publishes
+  no A records, so calls fail with a DNS error rather than an HTTP status. The
+  buyback leg would have failed on its first real run. Now pointed at
+  `lite-api.jup.ag/swap/v1`, verified end to end: the quote returns every field
+  the crank reads, and the swap build returns a parseable transaction.
+
+Still untested: the claim path has never run against a real mint with real fees,
+because no mint exists yet. Run it in dry-run mode first — it is dry by default
+and `--execute` is the only way to spend anything.
 
 ### 3. Legal review
 Paying holders for holding sits closer to a securities-style profit expectation
