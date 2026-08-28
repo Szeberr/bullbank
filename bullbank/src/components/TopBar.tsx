@@ -1,10 +1,11 @@
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 import { ChevronDown, RefreshCw } from "lucide-react";
-import { Wordmark } from "./BullMark";
+import { BullMark, Wordmark } from "./BullMark";
+import { GithubIcon } from "./LaunchInfo";
 import { Button } from "./ui/button";
 import { shortAddress } from "../lib/format";
-import { CLUSTER } from "../solana/config";
+import { CLUSTER, SOCIALS } from "../solana/config";
 import { cn } from "../lib/utils";
 
 /**
@@ -58,8 +59,13 @@ export function TopBar({
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-ground/85 backdrop-blur-xl">
       <div className="mx-auto flex h-16 max-w-[1440px] items-center gap-4 px-5">
-        <button onClick={() => onNavigate("app")} className="flex items-center">
-          <Wordmark />
+        <button
+          onClick={() => onNavigate("app")}
+          className="flex shrink-0 items-center gap-2"
+          aria-label="BullBank home"
+        >
+          <BullMark size={22} className="text-accent" />
+          <Wordmark className="hidden sm:block" />
         </button>
 
         {/* Tabs rather than a menu. Scrolls sideways on narrow screens rather
@@ -123,6 +129,15 @@ export function TopBar({
         )}
 
         <div className="ml-auto flex shrink-0 items-center gap-3">
+          <a
+            href={SOCIALS.github}
+            target="_blank"
+            rel="noreferrer"
+            title="Read the code on GitHub"
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-line text-ink-faint transition-colors hover:border-accent-dim hover:text-accent"
+          >
+            <GithubIcon size={14} />
+          </a>
           <button
             onClick={onRefresh}
             className="flex items-center gap-1.5 text-[11px] text-ink-faint transition-colors hover:text-ink-muted"
