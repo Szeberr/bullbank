@@ -80,11 +80,7 @@ Still untested: the claim path has never run against a real mint with real fees,
 because no mint exists yet. Run it in dry-run mode first — it is dry by default
 and `--execute` is the only way to spend anything.
 
-### 3. Legal review
-Paying holders for holding sits closer to a securities-style profit expectation
-than deposit-based staking. This should be reviewed before launch, not after.
-
-### 4. Decide the emission rate
+### 3. Decide the emission rate
 **Permanent once `initialize_pool` runs.** There is no setter. Set it low enough
 that normal trading volume comfortably outruns it, or the schedule runs dry and
 accrual pauses until the next buyback.
