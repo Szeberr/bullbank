@@ -119,38 +119,29 @@ accrual pauses until the next buyback.
 
 ## Hosting
 
-Cloudflare Pages, connected to the GitHub repo so every push to `main`
-redeploys. Settings:
+Cloudflare Workers (static assets), connected to the GitHub repo so every push
+to `main` redeploys. Live at **https://bullbank.lol9944gg.workers.dev**.
 
 | Field | Value |
 |---|---|
-| Root directory | `bullbank` |
-| Build command | `npm run build` |
-| Output directory | `dist` |
+| Path | `/bullbank` |
+| Build command | `npm ci && npm run build` |
+| Deploy command | `npx wrangler deploy` |
 
-**Every `VITE_*` value is compiled into the JavaScript bundle and is public.**
-Not a secret store — anyone can read them in devtools. So the deployed build
-uses the free public RPC rather than the Helius key, which would otherwise be
-scraped and drained.
+`bullbank/wrangler.jsonc` names `dist` as the asset directory. `public/_headers`
+is honoured on this flow — verified against the deployed site, which returns
+`X-Frame-Options: DENY` and `frame-ancestors none`.
 
-Pre-launch environment variables:
+A `workers.dev` subdomain is fine for a preview and weak for launch: it is a
+shared domain, some link scanners treat it with suspicion, and this one spells
+out the account holder email handle. Buy a real domain before launch.
 
-```
-VITE_SITE_URL=https://bullbank.pages.dev
-VITE_RPC_URL=https://api.devnet.solana.com
-VITE_CLUSTER=devnet
-VITE_PROGRAM_ID=BLj7FScr8f57ygqFGJJtZ3sVRCx7C7gUQihyUWYptBYq
-VITE_TOKEN_MINT=2Em69puVvwyjMgKDwVbd1kKwEAcLg8yWzLPcF5u5Fqdu
-VITE_POOL_PDA=9xP363ZbhVRJHJPrpm8X1JKYogszhQQPMdBtZaZ8VQL
-VITE_STAKE_VAULT=7xbKLjo9yvqEy2wqPG1GyAHw6pdEdVWNf4H55dfiqpnT
-VITE_REWARD_VAULT=J3rGgompojN27DZovjP3rwj5dS5tgfSFVivD9MeDDMMj
-VITE_TOKEN_DECIMALS=6
-VITE_LAUNCHED=false
-VITE_SOURCE_URL=https://github.com/Szeberr/bullbank
-VITE_CRANK_LOG_URL=https://github.com/Szeberr/bullbank/actions
-VITE_CRANK_INTERVAL_HOURS=6
-VITE_AIRDROP_PERCENT=3
-```
+Build configuration lives in `bullbank/.env.production`, tracked in the repo.
+**Every `VITE_*` value is compiled into the JavaScript bundle and is public** —
+not a secret store, so no key goes in it. That is also why the deployed build
+uses the free public RPC rather than a Helius key, which would be scraped.
+Verified from the live origin: `getHealth` ok and the pool account reads.
+
 
 The site is deliberately on devnet until launch, and the DEVNET badge in the
 header says so. It is a working preview, not a live product, and it should not
