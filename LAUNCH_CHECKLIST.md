@@ -72,9 +72,21 @@ accrual pauses until the next buyback.
    `target/deploy/memecoin_staking-keypair.json` first — it is the program's
    identity and cannot be regenerated.
 2. **Create the token on ansem.io.** Name, ticker, description and image are
-   written on-chain and can never be changed. Budget ~0.92 SOL minimum
-   (0.874 community airdrop buy + 0.031 gas), plus 0.5 for the enhanced page and
-   whatever dev buy you choose.
+   written on-chain and can never be changed.
+
+   **Decided:** FREE tier, **30,000,000 airdrop (the 3% minimum)**, **no dev buy**.
+
+   | | SOL |
+   |---|---|
+   | Community airdrop buy (30M) | 0.874 |
+   | Gas reserve | 0.060 |
+   | **Total** | **0.951** |
+
+   Gold and Diamond tiers need ~$35.8k and ~$143k of $ANSEM burned — out of
+   budget, so FREE it is. The airdrop slider sets how many of OUR tokens are
+   bought on the curve and given to $ANSEM holders; the minimum keeps the cost
+   down and limits the free-supply overhang at migration. No dev buy is needed
+   because the reserve is funded by buybacks, not by a launch allocation.
 3. **Run `init-pool-bullbank.ts init`.** This locks the emission rate forever.
 4. **Run `fund`** to move the first buyback into the reserve.
 5. **Update `bullbank/.env`** with the mint, pool PDA and both vault addresses

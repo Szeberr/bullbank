@@ -52,8 +52,8 @@ export function TopBar({
   refreshing: boolean;
   lastUpdated: number | null;
   onRefresh: () => void;
-  route: "app" | "how" | "proof" | "plan";
-  onNavigate: (r: "app" | "how" | "proof" | "plan") => void;
+  route: "app" | "how" | "calc" | "proof" | "plan";
+  onNavigate: (r: "app" | "how" | "calc" | "proof" | "plan") => void;
 }) {
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-ground/85 backdrop-blur-xl">
@@ -62,21 +62,23 @@ export function TopBar({
           <Wordmark />
         </button>
 
-        {/* Two pages, so tabs rather than a menu. */}
-        <nav className="ml-2 flex items-center gap-1 sm:ml-4">
+        {/* Tabs rather than a menu. Scrolls sideways on narrow screens rather
+            than wrapping and making the bar two rows tall. */}
+        <nav className="scrollbar-none ml-2 flex min-w-0 flex-1 items-center gap-1 overflow-x-auto sm:ml-4 sm:flex-none">
           <button
             onClick={() => onNavigate("app")}
             className={cn(
-              "flex h-9 items-center rounded-lg px-2.5 text-xs font-medium transition-colors sm:px-3",
+              "flex h-9 shrink-0 items-center rounded-lg px-2.5 text-xs font-medium transition-colors sm:px-3",
               route === "app" ? "bg-surface-2 text-ink" : "text-ink-faint hover:text-ink-muted"
             )}
           >
-            Dashboard
+            <span className="sm:hidden">Home</span>
+            <span className="hidden sm:inline">Dashboard</span>
           </button>
           <button
             onClick={() => onNavigate("how")}
             className={cn(
-              "flex h-9 items-center rounded-lg px-2.5 text-xs font-medium transition-colors sm:px-3",
+              "flex h-9 shrink-0 items-center rounded-lg px-2.5 text-xs font-medium transition-colors sm:px-3",
               route === "how" ? "bg-surface-2 text-ink" : "text-ink-faint hover:text-ink-muted"
             )}
           >
@@ -84,9 +86,19 @@ export function TopBar({
             <span className="hidden sm:inline">How it works</span>
           </button>
           <button
+            onClick={() => onNavigate("calc")}
+            className={cn(
+              "flex h-9 shrink-0 items-center rounded-lg px-2.5 text-xs font-medium transition-colors sm:px-3",
+              route === "calc" ? "bg-surface-2 text-ink" : "text-ink-faint hover:text-ink-muted"
+            )}
+          >
+            <span className="sm:hidden">Calc</span>
+            <span className="hidden sm:inline">Calculator</span>
+          </button>
+          <button
             onClick={() => onNavigate("proof")}
             className={cn(
-              "flex h-9 items-center rounded-lg px-2.5 text-xs font-medium transition-colors sm:px-3",
+              "flex h-9 shrink-0 items-center rounded-lg px-2.5 text-xs font-medium transition-colors sm:px-3",
               route === "proof" ? "bg-surface-2 text-ink" : "text-ink-faint hover:text-ink-muted"
             )}
           >
@@ -96,7 +108,7 @@ export function TopBar({
           <button
             onClick={() => onNavigate("plan")}
             className={cn(
-              "flex h-9 items-center rounded-lg px-2.5 text-xs font-medium transition-colors sm:px-3",
+              "flex h-9 shrink-0 items-center rounded-lg px-2.5 text-xs font-medium transition-colors sm:px-3",
               route === "plan" ? "bg-surface-2 text-ink" : "text-ink-faint hover:text-ink-muted"
             )}
           >
@@ -105,12 +117,12 @@ export function TopBar({
         </nav>
 
         {CLUSTER !== "mainnet-beta" && (
-          <span className="rounded-md border border-accent-dim/50 bg-accent/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-accent">
+          <span className="hidden shrink-0 rounded-md border border-accent-dim/50 bg-accent/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.1em] text-accent sm:inline">
             {CLUSTER}
           </span>
         )}
 
-        <div className="ml-auto flex items-center gap-3">
+        <div className="ml-auto flex shrink-0 items-center gap-3">
           <button
             onClick={onRefresh}
             className="flex items-center gap-1.5 text-[11px] text-ink-faint transition-colors hover:text-ink-muted"

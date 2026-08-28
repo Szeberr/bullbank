@@ -50,11 +50,17 @@ function buildItems(): Item[] {
       status: "done",
     },
     {
+      title: "Reviewed our own code, published what we found",
+      detail:
+        "Three bugs found and fixed, written up in full. Worth reading — but we wrote the program, so it is not independent review and we do not present it as such.",
+      status: "done",
+    },
+    {
       title: "Independent audit",
       detail: audited
         ? "Complete. The full report is published, including everything it found."
-        : "A third-party security firm reviews the program before it holds real money. The report gets published in full, including anything it finds.",
-      status: audited ? "done" : "active",
+        : "Not funded. An audit costs more than this project currently has. If it earns enough in fees, this is the first thing that money goes to.",
+      status: audited ? "done" : "next",
     },
     {
       title: `Launch ${TOKEN_SYMBOL}`,

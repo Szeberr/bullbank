@@ -1,6 +1,7 @@
 import { Wallet, RefreshCw, TrendingUp, HandCoins } from "lucide-react";
 import { Card, CardBody } from "./ui/card";
 import { TOKEN_SYMBOL, TIERS } from "../solana/config";
+import { LaunchpadNote } from "./LaunchpadNote";
 import { cn } from "../lib/utils";
 
 /**
@@ -114,6 +115,8 @@ export function HowItWorks() {
           </Card>
         ))}
       </div>
+
+      <LaunchpadNote className="mt-14" />
 
       {/* Optional locking */}
       <div className="mt-14">

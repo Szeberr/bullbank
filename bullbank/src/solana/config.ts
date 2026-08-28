@@ -55,6 +55,9 @@ export const PROOF_LINKS = {
 /** How often the buyback job is scheduled to run, in hours. */
 export const CRANK_INTERVAL_HOURS = Number(env.VITE_CRANK_INTERVAL_HOURS ?? 6);
 
+/** Share of supply set aside for $ANSEM holders by the launchpad, in percent. */
+export const AIRDROP_PERCENT = Number(env.VITE_AIRDROP_PERCENT ?? 3);
+
 export const TOKEN_SYMBOL = "BULL";
 export const TOKEN_NAME = "BullBank";
 
@@ -164,3 +167,12 @@ export const EXPLORER = (sig: string) =>
 
 export const EXPLORER_ACCOUNT = (addr: string) =>
   `https://solscan.io/account/${addr}${CLUSTER !== "mainnet-beta" ? `?cluster=${CLUSTER}` : ""}`;
+
+/**
+ * Total supply, in whole tokens.
+ *
+ * pump.fun mints a fixed 1,000,000,000 and nothing in this program can create
+ * more — `fund_rewards` only moves existing tokens into the reserve. Used by the
+ * calculator to bound "how much could ever be synced".
+ */
+export const TOTAL_SUPPLY = Number(env.VITE_TOTAL_SUPPLY ?? 1_000_000_000);
